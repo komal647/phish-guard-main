@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PhishGuard Design System - Cybersecurity Theme */
+
+@layer base {
+  :root {
+    /* Core palette - Dark cybersecurity theme */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 96%;
+
+    /* Primary - Cyber cyan */
+    --primary: 175 80% 50%;
+    --primary-foreground: 222 47% 6%;
+
+    /* Secondary - Deep slate */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 60%;
+
+    --accent: 217 33% 20%;
+    --accent-foreground: 210 40% 96%;
+
+    /* Status colors - Enhanced Neon Palette */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --safe: 142 86% 53%;
+    --safe-foreground: 222 47% 6%;
+
+    --warning: 42 100% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    --danger: 350 89% 55%;
+    --danger-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 17%;
+    --ring: 175 80% 50%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(175 80% 50%), hsl(195 80% 45%));
+    --gradient-safe: linear-gradient(135deg, hsl(142 76% 45%), hsl(160 70% 40%));
+    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(45 93% 47%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 72% 51%), hsl(350 80% 45%));
+    --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 4%));
+
+    /* Glow effects */
+    --glow-primary: 0 0 20px hsl(175 80% 50% / 0.3);
+    --glow-safe: 0 0 20px hsl(142 76% 45% / 0.3);
+    --glow-warning: 0 0 20px hsl(38 92% 50% / 0.3);
+    --glow-danger: 0 0 20px hsl(0 72% 51% / 0.3);
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 175 80% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 217 33% 20%;
+    --sidebar-ring: 175 80% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-safe {
+    box-shadow: var(--glow-safe);
+  }
+
+  .glow-warning {
+    box-shadow: var(--glow-warning);
+  }
+
+  .glow-danger {
+    box-shadow: var(--glow-danger);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-scan-line {
+    animation: scan-line 2s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 0.8;
+      filter: brightness(1.2);
+    }
+  }
+
+  @keyframes scan-line {
+    0% {
+      transform: translateY(-100%);
+    }
+    50% {
+      transform: translateY(100%);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(175 80% 50% / 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  @keyframes matrix-scan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 0% 200%; }
+  }
+
+  .animate-matrix {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      hsl(var(--primary)/30) 2px,
+      transparent 4px
+    );
+    background-size: 100% 200%;
+    animation: matrix-scan 1.5s linear infinite;
+  }
+}

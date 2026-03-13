@@ -1,0 +1,332 @@
+# PhishGuard — Project Review Document
+
+> **Project:** PhishGuard — AI-Powered Phishing Detection Application
+> **Date:** February 27, 2026
+> **Repository Root:** `phish-guard-main/`
+
+---
+
+## 1. Project Overview
+
+PhishGuard is a **full-stack web application** that detects phishing attacks in real-time. Users can paste a URL, email, SMS message, or upload a QR code / screenshot / PDF, and the app analyzes it using a combination of:
+- **AI-powered Supabase Edge Functions** (server-side)
+- **Client-side heuristic fallback** (offline-safe)
+- **Third-party threat intelligence APIs**
+
+---
+
+## 2. Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend Framework** | React 18 + TypeScript + Vite 5 |
+| **Styling** | Tailwind CSS v3 + shadcn/ui components |
+| **Animations** | Framer Motion |
+| **Routing** | React Router DOM v6 |
+| **State/Async** | TanStack React Query |
+| **Backend (Edge)** | Supabase Edge Functions (Deno runtime) |
+| **Database** | Supabase PostgreSQL |
+| **Auth** | Supabase Auth (Email + Google OAuth) |
+| **PWA** | vite-plugin-pwa |
+| **QR Scanning** | html5-qrcode |
+| **OCR (Screenshots)** | Tesseract.js |
+| **PDF Extraction** | pdfjs-dist |
+| **Testing** | Vitest + @testing-library/react |
+| **Linting** | ESLint + typescript-eslint |
+
+---
+
+## 3. Project File Structure
+
+```
+phish-guard-main/
+├── index.html                        # App entry HTML (SEO meta tags, OG tags)
+├── package.json                      # Dependencies & npm scripts
+├── vite.config.ts                    # Vite + PWA plugin config
+├── tailwind.config.ts                # Tailwind custom colors (safe, warning, danger)
+├── tsconfig.json / tsconfig.app.json # TypeScript configuration
+├── postcss.config.js                 # PostCSS for Tailwind
+├── eslint.config.js                  # ESLint rules
+├── vitest.config.ts                  # Vitest test config
+├── .env                              # Environment variables (Supabase keys)
+├── components.json                   # shadcn/ui component config
+│
+├── src/                              # Frontend source
+│   ├── main.tsx                      # App bootstrap / ReactDOM.render
+│   ├── App.tsx                       # Root component: routing + providers
+│   ├── App.css / index.css           # Global styles & CSS variables
+│   ├── vite-env.d.ts                 # Vite type declarations
+│   │
+│   ├── pages/
+│   │   ├── Index.tsx                 # Home page: scan tab + history tab
+│   │   ├── About.tsx                 # About/info page
+│   │   └── NotFound.tsx              # 404 page
+│   │
+│   ├── components/
+│   │   ├── Header.tsx                # App header with nav links & auth
+│   │   ├── NavLink.tsx               # Reusable nav link component
+│   │   ├── UserMenu.tsx              # User avatar / sign-out menu
+│   │   ├── AuthModal.tsx             # Email/Google sign-in dialog
+│   │   ├── ScannerInput.tsx          # Text input + input type switcher
+│   │   ├── QRScanner.tsx             # Live camera QR code scanner
+│   │   ├── ScreenshotScanner.tsx     # Image upload + OCR text extraction
+│   │   ├── PDFScanner.tsx            # PDF upload + text extraction
+│   │   ├── ScanResult.tsx            # Full result card with forensics panel
+│   │   ├── RiskMeter.tsx             # Circular gauge showing risk %
+│   │   ├── ScanHistory.tsx           # History list (local or DB)
+│   │   ├── ManualChecklist.tsx       # Phishing checklist for manual review
+│   │   ├── InstallPrompt.tsx         # PWA "Add to Home Screen" prompt
+│   │   ├── ErrorBoundary.tsx         # React error boundary
+│   │   └── ui/                       # 49 shadcn/ui components (button, card, badge,
+│   │                                 # dialog, tabs, toast, tooltip, etc.)
+│   │
+│   ├── hooks/
+│   │   ├── useAuth.tsx               # Auth context: sign-in, sign-up, Google OAuth
+│   │   ├── use-toast.ts              # Toast notification hook
+│   │   └── use-mobile.tsx            # Mobile breakpoint detection hook
+│   │
+│   ├── lib/
+│   │   ├── api.ts                    # Core API layer (see §5)
+│   │   ├── pdfExtractor.ts           # PDF.js-based text extraction utility
+│   │   └── utils.ts                  # cn() helper, generateUUID()
+│   │
+│   ├── integrations/
+│   │   └── supabase/
+│   │       ├── client.ts             # Supabase JS client initialization
+│   │       └── types.ts              # Auto-generated DB TypeScript types
+│   │
+│   └── test/                         # Frontend unit tests (Vitest)
+│
+├── supabase/
+│   ├── config.toml                   # Supabase local dev config
+│   │
+│   ├── functions/
+│   │   ├── _schemas.ts               # Shared Zod schemas for AI response parsing
+│   │   ├── test-all.ts               # Edge function test runner
+│   │   ├── detect-phishing/
+│   │   │   └── index.ts              # Main detection Edge Function (1683 lines)
+│   │   ├── extract-email-from-pdf/
+│   │   │   └── index.ts              # PDF email extraction Edge Function
+│   │   └── extract-urls-from-image/
+│   │       └── index.ts              # Image OCR / URL extraction Edge Function
+│   │
+│   └── migrations/
+│       ├── 20260125130834_...sql     # Initial DB schema (scan_history, etc.)
+│       └── 20260126065159_...sql     # Auth / RLS policy migration
+│
+└── public/                           # Static assets (icons, manifest)
+```
+
+---
+
+## 4. Frontend Pages
+
+### `src/pages/Index.tsx` — Home Page
+The main page with **two tabs**:
+- **Scanner Tab**: Shows `ScannerInput` → triggers scan → shows `ScanResult` with animation
+- **History Tab**: Shows `ScanHistory` with per-user or localStorage history
+- Handles session-based history migration (local → database on sign-in)
+
+### `src/pages/About.tsx` — About Page
+Describes the app features, detection methods, and team information.
+
+### `src/pages/NotFound.tsx` — 404 Page
+Simple fallback page for unknown routes.
+
+---
+
+## 5. Core Logic: `src/lib/api.ts`
+
+This is the heart of the **client-side intelligence layer** (721 lines):
+
+| Function | Purpose |
+|---|---|
+| `detectPhishing()` | Calls Supabase Edge Function; falls back to local detection on error |
+| `performLocalDetection()` | Full heuristic analysis (domains, keywords, lookalike, forensics) |
+| `fetchDNSRecords()` | DNS-over-HTTPS via Cloudflare for A, MX, TXT records |
+| `fetchDomainAge()` | OSINT via Wayback Machine CDX API to get domain first-seen date |
+| `detectLookalikeAttack()` | Character substitution detection (e.g. `g00gle.com` → `google.com`) |
+| `expandShortUrl()` | Resolves bit.ly/tinyurl via unshorten.me API |
+| `checkSemanticContext()` | Urgency + grammar pattern analysis |
+| `addToScanHistory()` | Saves to DB (authenticated) or localStorage (anonymous) |
+| `migrateLocalHistoryToDb()` | Moves localStorage history to DB on sign-in |
+
+---
+
+## 6. Backend: Supabase Edge Functions (Deno)
+
+### `supabase/functions/detect-phishing/index.ts` (1683 lines)
+
+The server-side detection engine. Runs in **Deno** on Supabase infrastructure.
+
+**Key Analysis Modules:**
+
+| Module | What It Does |
+|---|---|
+| Rate Limiting | 20 req/min per IP, auto-cleanup |
+| Input Validation | 50KB max, type detection (URL/email/SMS) |
+| `analyzeUrl()` | IP-URL, suspicious TLD, deep subdomains, entropy, homograph detection |
+| `detectLookalikeAttack()` | Character substitution with `LOOKALIKE_SUBSTITUTIONS` map |
+| `detectHomographAttack()` | Unicode lookalike (Cyrillic/Greek characters) |
+| `checkTyposquatting()` | Brand-pattern matching (amazon-secure, paypal-login, etc.) |
+| `analyzeEmailHeaders()` | From/Reply-To mismatch, free email provider spoofing |
+| `analyzeSubjectLine()` | Phishing keywords in subject header |
+| `checkGenericGreetings()` | "Dear Customer", "Dear Valued Member" patterns |
+| `checkAttachmentRisks()` | `.exe`, `.docm`, `.ps1`, macro file references |
+| `analyzeUrlsAndContent()` | Deep per-URL lookalike + hidden link + shortener analysis |
+| `heuristicAnalysis()` | Grammar errors, fake SSL claims, urgency score, fear tactics |
+| `behavioralAnalysis()` | Mismatched links, unusual payment requests, time pressure |
+| `analyzeHtmlPatterns()` | Embedded forms, hidden links, image-only emails |
+| `analyzeText()` | Scam patterns, credential request patterns |
+| **PhishTank API** | Community-verified phishing URL database check |
+| **Google Safe Browsing API** | Google's real-time threat list (v4) |
+
+**Detection Score → Label mapping:**
+- `0–19` → ✅ Safe
+- `20–49` → ⚡ Suspicious  
+- `50+` → 🚨 Phishing
+
+### `supabase/functions/extract-email-from-pdf/index.ts`
+Extracts email content from uploaded PDF files for analysis.
+
+### `supabase/functions/extract-urls-from-image/index.ts`
+Performs OCR on uploaded screenshots to extract URLs/text for analysis.
+
+### `supabase/functions/_schemas.ts`
+Shared Zod validation schemas used to parse AI model responses consistently.
+
+---
+
+## 7. Key React Components
+
+| Component | Role |
+|---|---|
+| `Header.tsx` | App-wide nav bar, theme toggle, auth state |
+| `ScannerInput.tsx` | Multi-mode input (text, URL, email, SMS, QR, screenshot, PDF) |
+| `QRScanner.tsx` | Live camera QR scanner using `html5-qrcode` |
+| `ScreenshotScanner.tsx` | Image upload + Tesseract.js OCR |
+| `PDFScanner.tsx` | PDF upload + PDF.js text extraction |
+| `ScanResult.tsx` | Full results display: RiskMeter, reasons, forensics, threat audit, checklist |
+| `RiskMeter.tsx` | Animated circular gauge (0–100% risk score) |
+| `ScanHistory.tsx` | Displays past scans, supports delete/clear/re-scan |
+| `ManualChecklist.tsx` | Step-by-step checklist for users to manually verify emails |
+| `AuthModal.tsx` | Sign-in / Sign-up form with Google OAuth button |
+| `InstallPrompt.tsx` | PWA install banner for mobile users |
+| `ErrorBoundary.tsx` | Catches React rendering errors gracefully |
+
+---
+
+## 8. Custom Hooks
+
+| Hook | Purpose |
+|---|---|
+| `useAuth.tsx` | Global auth context: user, session, signUp, signIn, signInWithGoogle, signOut |
+| `use-toast.ts` | Toast notifications throughout the app |
+| `use-mobile.tsx` | Detects if user is on mobile (< 768px breakpoint) |
+
+---
+
+## 9. Database (Supabase PostgreSQL)
+
+### `scan_history` Table
+| Column | Type | Description |
+|---|---|---|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK → auth.users (nullable for anonymous) |
+| `content` | TEXT | Scanned input |
+| `input_type` | TEXT | url / email / sms |
+| `label` | TEXT | safe / suspicious / phishing |
+| `risk_percentage` | NUMERIC | 0–100 |
+| `confidence` | NUMERIC | 0–1 |
+| `top_reasons` | TEXT[] | Array of flagged reasons |
+| `details` | JSONB | Full indicators + analysis_summary |
+| `created_at` | TIMESTAMPTZ | Scan timestamp |
+
+**Row Level Security (RLS):** Users can only read/write their own rows.
+
+---
+
+## 10. Third-Party APIs Used
+
+| API | Purpose | Where Used |
+|---|---|---|
+| **Google Safe Browsing v4** | Real-time malicious URL lookup | Edge Function (server-side key) |
+| **PhishTank** | Community phishing URL database | Edge Function |
+| **Cloudflare DNS-over-HTTPS** | DNS A/MX/TXT record lookup | `src/lib/api.ts` (client) |
+| **Wayback Machine CDX API** | Domain age estimation via first snapshot | `src/lib/api.ts` (client) |
+| **unshorten.me** | Resolve short URLs | `src/lib/api.ts` (client) |
+| **Supabase** | Auth, DB, Edge Functions | Throughout |
+
+---
+
+## 11. Data Flow
+
+```mermaid
+flowchart TD
+    A["User Input\n(URL / Email / SMS / QR / Screenshot / PDF)"] --> B[ScannerInput.tsx]
+    B --> C{Input Type?}
+    C -->|QR| D[QRScanner.tsx\nhtml5-qrcode]
+    C -->|Screenshot| E[ScreenshotScanner.tsx\nTesseract.js OCR]
+    C -->|PDF| F[PDFScanner.tsx\nPDF.js]
+    C -->|Text| G[lib/api.ts detectPhishing]
+    D --> G
+    E --> G
+    F --> G
+    G -->|Supabase invoke| H["Edge Function\ndetect-phishing/index.ts"]
+    H --> I[Heuristic Analyzers]
+    H --> J[Google Safe Browsing API]
+    H --> K[PhishTank API]
+    I --> L[Score Aggregation]
+    J --> L
+    K --> L
+    L --> M[DetectionResult JSON]
+    M --> G
+    G -->|Client augment| N[fetchDNSRecords + fetchDomainAge]
+    N --> O[ScanResult.tsx]
+    O --> P[RiskMeter + Forensics + Threat Audit]
+    G --> Q[addToScanHistory\nDB or localStorage]
+```
+
+---
+
+## 12. PWA Support
+
+The app is a **Progressive Web App** (via `vite-plugin-pwa`):
+- Installable on mobile home screen
+- Service worker for offline capability
+- `InstallPrompt.tsx` shows install banner
+
+---
+
+## 13. Authentication Flow
+
+1. User clicks **Sign In** → `AuthModal.tsx` opens
+2. Email/password → `supabase.auth.signInWithPassword()`
+3. Google → `supabase.auth.signInWithOAuth({ provider: 'google' })`
+4. `useAuth.tsx` listens via `onAuthStateChange` → updates global context
+5. On sign-in: `migrateLocalHistoryToDb()` moves any anonymous scan history to the DB
+
+---
+
+## 14. Detection Indicators Summary
+
+The system checks for **25+ threat indicators** including:
+
+- 🔴 **High Severity**: IP-based URL, lookalike domain, homograph attack, email spoofing, embedded forms, credential harvesting, dangerous attachments
+- 🟡 **Medium Severity**: Suspicious TLD, URL shortener, deep subdomains, urgency language, generic greetings, reply-to mismatch, URL entropy
+- 🟢 **Low Severity**: Long URL, poor HTML formatting, grammar errors, single CTA
+
+---
+
+## 15. Configuration Files
+
+| File | Purpose |
+|---|---|
+| `vite.config.ts` | Vite build config, PWA plugin, path aliases (`@/`) |
+| `tailwind.config.ts` | Custom colors: `safe` (green), `warning` (amber), `danger` (red) |
+| `components.json` | shadcn/ui component generator config |
+| `tsconfig.app.json` | Strict TypeScript with path aliases |
+| `vitest.config.ts` | Test environment = jsdom, setup files |
+| `eslint.config.js` | ESLint with react-hooks + react-refresh plugins |
+| `.env` | `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` |
+| `supabase/config.toml` | Supabase project ID config |
