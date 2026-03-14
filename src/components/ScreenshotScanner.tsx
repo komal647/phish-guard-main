@@ -4,8 +4,6 @@ import { Image, Upload, X, Loader2, Link, Clipboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { functions } from "@/lib/firebase";
-import { httpsCallable } from "firebase/functions";
 import Tesseract from 'tesseract.js';
 
 interface ScreenshotScannerProps {

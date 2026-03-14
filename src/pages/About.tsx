@@ -1,36 +1,72 @@
 import { motion } from "framer-motion";
-import { Shield, Target, Users, Zap, Lock, Eye, CheckCircle } from "lucide-react";
+import { Shield, Target, Users, Zap, Lock, Eye, CheckCircle, Brain, Cpu, Globe, ScanLine, FileSearch, Camera } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 
 const features = [
   {
-    icon: Zap,
-    title: "AI-Powered Detection",
-    description: "Advanced machine learning algorithms analyze URLs, emails, and messages in real-time to identify phishing attempts."
+    icon: Brain,
+    title: "Logistic Regression ML Model",
+    description: "A custom-built binary classifier using 16 weighted features and the sigmoid function to calculate phishing probability in real-time."
   },
   {
     icon: Eye,
-    title: "Multi-Source Analysis",
-    description: "We cross-reference content against PhishTank databases, pattern matching, and AI analysis for comprehensive protection."
+    title: "6-Source Threat Intelligence",
+    description: "Cross-references URLs against VirusTotal, Google Safe Browsing, PhishTank, IPQualityScore, Cloudmersive, and URLhaus through secure serverless APIs."
   },
   {
     icon: Lock,
-    title: "Privacy First",
-    description: "Your scanned content is analyzed securely and never stored without your consent. Your privacy is our priority."
+    title: "Secure API Architecture",
+    description: "All third-party API keys are stored in Vercel environment variables and proxied through serverless functions — never exposed to the browser."
   },
   {
-    icon: Target,
+    icon: Cpu,
+    title: "NLP Feature Extraction",
+    description: "Analyzes text for urgency keywords, grammar patterns, credential requests, cryptocurrency addresses, and sender reputation signals."
+  },
+  {
+    icon: ScanLine,
+    title: "Lookalike & Homograph Detection",
+    description: "Detects Unicode-based domain impersonation (e.g., g00gle.com, pаypal.com) using character substitution tables across 11 known brands."
+  },
+  {
+    icon: Camera,
     title: "QR Code & Screenshot Scanning",
-    description: "Extract and analyze URLs from QR codes and screenshots using advanced OCR technology."
+    description: "Extract and analyze URLs from QR codes (html5-qrcode) and screenshots (Tesseract.js OCR) with brand color mismatch analysis."
+  },
+  {
+    icon: FileSearch,
+    title: "PDF Email Extraction",
+    description: "Upload email PDFs to extract content, headers, and embedded URLs using pdfjs-dist with Tesseract.js OCR fallback for image-based PDFs."
+  },
+  {
+    icon: Globe,
+    title: "DNS Forensics & Domain Age",
+    description: "Queries Cloudflare DNS-over-HTTPS for A/MX/TXT records and verifies domain age via RDAP/WHOIS — newly registered domains trigger high-risk alerts."
   }
 ];
 
 const stats = [
-  { value: "99.2%", label: "Detection Accuracy" },
-  { value: "< 3s", label: "Average Scan Time" },
-  { value: "24/7", label: "Real-time Protection" },
+  { value: "16", label: "ML Features" },
+  { value: "6", label: "Threat Intel APIs" },
+  { value: "11", label: "Brand Monitors" },
   { value: "Free", label: "For Everyone" }
+];
+
+const techStack = [
+  { category: "AI / ML", items: ["Logistic Regression Classifier", "NLP Feature Extraction", "Tesseract.js OCR", "Brand Color Analysis (Canvas API)"] },
+  { category: "Frontend", items: ["React 18 + TypeScript", "Vite 5", "TailwindCSS", "Framer Motion", "shadcn/ui (Radix)"] },
+  { category: "Backend", items: ["Vercel Serverless Functions", "Firebase Auth", "Cloud Firestore", "Cloudflare DNS-over-HTTPS"] },
+  { category: "Scanning", items: ["html5-qrcode (QR)", "pdfjs-dist (PDF)", "Tesseract.js (OCR)", "URL Expansion (unshorten.me)"] }
+];
+
+const algorithms = [
+  { name: "Logistic Regression", description: "σ(z) = 1/(1+e^(-z)) with 16 weighted features for binary phishing classification" },
+  { name: "Homograph Detection", description: "Unicode character substitution mapping against 11 known brand domains" },
+  { name: "Regex-based NLP", description: "Pattern matching for urgency, credential requests, crypto wallets, and suspicious attachments" },
+  { name: "DNS Forensics", description: "Cloudflare DoH queries for A/MX/TXT records to detect infrastructure anomalies" },
+  { name: "Domain Age Verification", description: "RDAP → WHOIS fallback to flag domains registered < 30 days ago" },
+  { name: "URL Risk Scoring", description: "Multi-source score aggregation: min(local ML + server API scores, 100)" }
 ];
 
 export default function About() {
@@ -67,8 +103,8 @@ export default function About() {
             About <span className="gradient-text">PhishGuard</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Your trusted companion in the fight against phishing attacks. 
-            We're on a mission to make the internet safer for everyone.
+            AI-powered phishing detection combining machine learning, NLP, computer vision, 
+            and multi-source threat intelligence to protect you in real-time.
           </p>
         </motion.section>
 
@@ -122,10 +158,10 @@ export default function About() {
                 we believe everyone deserves access to powerful cybersecurity tools—not just large corporations.
               </p>
               <p className="text-lg text-muted-foreground leading-relaxed mt-4">
-                Our AI-powered platform analyzes suspicious URLs, emails, SMS messages, QR codes, 
-                and screenshots to help you identify potential threats before they cause harm. 
-                We combine cutting-edge machine learning with real-time threat intelligence to 
-                provide accurate, instant protection.
+                Our platform combines a <strong>custom logistic regression ML model</strong> with 
+                <strong> 6 real-time threat intelligence APIs</strong>, <strong>DNS forensics</strong>, 
+                <strong> domain age verification</strong>, and <strong>NLP-based content analysis </strong> 
+                to deliver accurate, instant protection across URLs, emails, SMS, QR codes, screenshots, and PDFs.
               </p>
             </CardContent>
           </Card>
@@ -139,8 +175,8 @@ export default function About() {
           className="mb-16"
         >
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">What We Offer</h2>
-            <p className="text-muted-foreground">Comprehensive protection powered by AI</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Core Capabilities</h2>
+            <p className="text-muted-foreground">Multi-layered detection powered by AI and threat intelligence</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {features.map((feature, index) => (
@@ -168,7 +204,7 @@ export default function About() {
           </div>
         </motion.section>
 
-        {/* How It Works Section */}
+        {/* Algorithms Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -176,27 +212,98 @@ export default function About() {
           className="mb-16"
         >
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">How It Works</h2>
-            <p className="text-muted-foreground">Simple, fast, and effective protection</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Algorithms & Models</h2>
+            <p className="text-muted-foreground">The intelligence behind the detection</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {algorithms.map((algo, index) => (
+              <motion.div
+                key={algo.name}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 + index * 0.08 }}
+              >
+                <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all h-full">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Cpu className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold text-sm">{algo.name}</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{algo.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Tech Stack Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mb-16"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Technology Stack</h2>
+            <p className="text-muted-foreground">Built with modern, production-ready technologies</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {techStack.map((stack, index) => (
+              <motion.div
+                key={stack.category}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
+              >
+                <Card className="bg-card/50 border-border/50 h-full">
+                  <CardContent className="p-5">
+                    <h3 className="font-bold text-primary mb-3 text-sm uppercase tracking-wider">{stack.category}</h3>
+                    <ul className="space-y-2">
+                      {stack.items.map((item) => (
+                        <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CheckCircle className="w-3.5 h-3.5 text-primary/70 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* How It Works Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mb-16"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">How It Works</h2>
+            <p className="text-muted-foreground">Multi-layered detection pipeline</p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-6">
             {[
-              { step: "1", title: "Paste or Scan", description: "Enter a URL, paste an email/SMS, scan a QR code, or upload a screenshot." },
-              { step: "2", title: "AI Analysis", description: "Our multi-layered AI engine analyzes the content against known threats and patterns." },
-              { step: "3", title: "Get Results", description: "Receive a detailed risk assessment with clear recommendations in seconds." }
+              { step: "1", title: "Input", description: "Paste a URL, email, or SMS — or scan a QR code, screenshot, or PDF document." },
+              { step: "2", title: "ML Analysis", description: "Our 16-feature logistic regression model extracts NLP features and calculates phishing probability." },
+              { step: "3", title: "Threat Intel", description: "URLs are checked against 6 threat intelligence APIs through secure serverless functions." },
+              { step: "4", title: "Results", description: "Scores are merged and you get a detailed risk assessment with forensics, indicators, and recommendations." }
             ].map((item, index) => (
               <motion.div
                 key={item.step}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
                 className="text-center"
               >
                 <div className="relative inline-flex mb-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-2xl font-bold gradient-text">{item.step}</span>
                   </div>
-                  {index < 2 && (
+                  {index < 3 && (
                     <div className="hidden md:block absolute top-1/2 left-full w-full h-0.5 bg-gradient-to-r from-primary/50 to-transparent -translate-y-1/2" />
                   )}
                 </div>
@@ -207,11 +314,11 @@ export default function About() {
           </div>
         </motion.section>
 
-        {/* Team Section */}
+        {/* Bottom CTA */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
         >
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <CardContent className="p-8 md:p-12 text-center">
@@ -223,7 +330,7 @@ export default function About() {
                 a tech-savvy professional or someone just learning about online safety.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
-                {["Free to Use", "No Account Required", "Instant Results", "Privacy Focused"].map((tag) => (
+                {["Free to Use", "No Account Required", "Instant Results", "Privacy Focused", "Open Source", "PWA Installable"].map((tag) => (
                   <span
                     key={tag}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium"
@@ -241,7 +348,7 @@ export default function About() {
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>© {new Date().getFullYear()} PhishGuard. Protecting you from phishing, one scan at a time.</p>
+          <p>© {new Date().getFullYear()} PhishGuard. AI-Powered Phishing Detection — Protecting you one scan at a time.</p>
         </div>
       </footer>
     </div>

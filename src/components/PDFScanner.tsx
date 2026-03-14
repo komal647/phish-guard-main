@@ -2,8 +2,6 @@ import { useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileUp, Loader2, FileText, AlertCircle, CheckCircle } from "lucide-react";
-import { functions } from "@/lib/firebase";
-import { httpsCallable } from "firebase/functions";
 import { cn } from "@/lib/utils";
 import { extractPDFText, initPDFWorker } from "@/lib/pdfExtractor";
 import Tesseract from 'tesseract.js';
