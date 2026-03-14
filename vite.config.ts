@@ -107,7 +107,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'placeholder.svg'],
+      includeAssets: ['robots.txt', 'pwa-512x512.png'],
       devOptions: {
         enabled: true
       },
@@ -164,11 +164,6 @@ export default defineConfig(({ mode }) => ({
           }
         ] as any,
         icons: [
-          {
-            src: 'favicon.ico',
-            sizes: '64x64 32x32 24x24 16x16',
-            type: 'image/x-icon'
-          },
           {
             src: 'pwa-512x512.png',
             sizes: '192x192',
